@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"profile/database"
 	"profile/models"
+	"strings"
 )
 
 func RegisterHandlers() {
@@ -31,7 +32,7 @@ func handleCreateProfile(w http.ResponseWriter, r *http.Request) {
 	// this data is from front-end
 	// only for test purposes
 	user := models.Profile{
-		ID:           1,
+		ID:           "1",
 		Name:         "test",
 		UserName:     "test_n",
 		Password:     "test",
@@ -48,5 +49,16 @@ func handleCreateProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteProfile(w http.ResponseWriter, r *http.Request) {
+	id := strings.TrimPrefix(r.URL.Path, "/delete-profile/")
+	if id == "" {
+		log.Print(w, "Profile ID is required", http.StatusBadRequest)
+	}
 
+	if err := database.DeleteProfile(id); err != nil {
+		log.Printf("Error deleting profile: %v", err)
+	}
+	
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("Profile with ID %v deleted successfully", id)))
 }
